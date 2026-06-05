@@ -7,6 +7,7 @@ import { useShiftStore } from '../../stores/shiftStore.js'
 import { useStoreContext } from '../../stores/storeContext.js'
 import { supabase } from '../../lib/supabase.js'
 import { fmt, fmtDate, generateOrderNumber, buildWhatsApp, STORE_PHONE } from '../../lib/utils.js'
+import { printReceipt } from '../../lib/printer.js'
 import toast from 'react-hot-toast'
 
 // ── Category Tabs ────────────────────────────────────────────
@@ -405,7 +406,7 @@ export default function POSPage() {
     }
 
     cart.clear()
-    setTimeout(() => window.print(), 300)
+    printReceipt(inv, settings)
   }
 
   const [invoiceFilter, setInvoiceFilter] = useState({ from: new Date().toISOString().slice(0,10), to: new Date().toISOString().slice(0,10), customer: '' })
@@ -447,8 +448,9 @@ export default function POSPage() {
   }
 
   const reprintInvoice = (inv) => {
-    setLastInvoice({ ...inv, items: inv.pos_invoice_items || [] })
-    setTimeout(() => window.print(), 300)
+    const normalized = { ...inv, items: inv.pos_invoice_items || inv.items || [] }
+    setLastInvoice(normalized)
+    printReceipt(normalized, settings)
   }
 
   const { currentShift, openShift, closeShift } = useShiftStore()
